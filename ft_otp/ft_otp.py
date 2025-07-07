@@ -30,28 +30,28 @@ def hotp(base32_secret, counter, digits=6):
     return str(code).zfill(digits)
 
 def get_counter():
-    time_now = time.time()
-    remaining = int (30 - (time_now % 30))
+    time_step = int(time.time() // 30) # better time tracking than comparing time stamps
+    remaining = int (30 - (time.time() % 30))
 
     if os.path.exists(COUNTER_STATE):
         with open (COUNTER_STATE, "r") as file:
             state = json.load(file)
 
-        last_time = state.get("timestamp", 0)
+        last_time_step = state.get("time step")
         counter = state.get("counter", 1)
 
-        # counter increment must happen every 30 seconds (execution delay however will increase the actuall increment time)
-        if time_now - last_time >= 30: 
+        if time_step != last_time_step:
             counter += 1
             state["counter"] = counter
-            state["timestamp"] = time_now
+            state["time step"] = time_step
 
             with open(COUNTER_STATE, "w") as file:
                 json.dump(state, file)
+            remaining = 30
             
     else: 
         counter = 1
-        state = {"counter": counter, "timestamp": time_now}
+        state = {"counter": counter, "time step": time_step}
 
         with open(COUNTER_STATE, "w") as file:
             json.dump(state, file)
@@ -120,7 +120,8 @@ def generate_one_time_password(encrypted_file):
                         base32_encoded_key = base64.b32encode(decrypted_file_content).decode("utf-8")
                         counter, remaining = get_counter()
                         otp = hotp(base32_encoded_key, counter)
-                        print(f"One time password succesfully generated: {otp} \n")
+
+                        print(f"\nOne time password succesfully generated: {otp}")
                         print(f"Time untill a new otp is generated: {remaining} seconds\n")
 
                     except Exception as e:
