@@ -158,5 +158,5 @@ if __name__ == "__main__":
 # Generate a random key: python3 generate_random_key.py  - or create a new file with your own hex key
 # Run: python3 ft_otp.py -g=random_key.txt  - (or your file) to save and encrypt key 
 # Run: python3 ft_otp.py -k=ft_otp.key  - to create a one time password  
-# Run: cleanup.sh to start over 
+# Run: python3 cleanup.py  - to start over
 
