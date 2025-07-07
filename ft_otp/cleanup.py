@@ -1,10 +1,11 @@
 import os
 
 files_to_delete = [
-    "random_key.txt",
+    "key.hex",
     "ft_otp.key",
     "encryption_key.key",
-    "counter.json"
+    "counter.json",
+    "otp_qr.png"
 ]
 
 for filename in files_to_delete:

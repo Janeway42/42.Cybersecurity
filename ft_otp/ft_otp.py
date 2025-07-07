@@ -9,8 +9,12 @@ import hashlib
 import struct
 import time
 import json
+import qrcode
+import pyotp
 
 COUNTER_STATE = "counter.json"
+generate_qr = False
+user_code = -1
 
 def hotp(base32_secret, counter, digits=6):
     # converts the base32 secret into raw binary bites
@@ -47,7 +51,6 @@ def get_counter():
 
             with open(COUNTER_STATE, "w") as file:
                 json.dump(state, file)
-            remaining = 30
             
     else: 
         counter = 1
@@ -96,7 +99,7 @@ def store_and_encript_key_file(file):
     except Exception as e:
         print(f"Unable to open file '{file}: {e}\n")
 
-def generate_one_time_password(encrypted_file):
+def generate_or_validate_one_time_password(encrypted_file, generate_qr, user_code):
     if not os.path.isfile(encrypted_file):
         return print(f"Encrypted file '{encrypted_file}' does not exist. Please encrypt and save key first\n")
     
@@ -119,10 +122,21 @@ def generate_one_time_password(encrypted_file):
                         # HOTP requires a base32 encode key
                         base32_encoded_key = base64.b32encode(decrypted_file_content).decode("utf-8")
                         counter, remaining = get_counter()
-                        otp = hotp(base32_encoded_key, counter)
 
-                        print(f"\nOne time password succesfully generated: {otp}")
-                        print(f"Time untill a new otp is generated: {remaining} seconds\n")
+                        if -1 != user_code:
+                            totp = pyotp.TOTP(base32_encoded_key)
+                            print(totp.verify(user_code)) 
+                        elif (generate_qr):
+                            qr = qrcode.make(f'otpauth://totp/OTPqr:Janeway?secret={base32_encoded_key}&issuer=OTPqr&counter={counter}')
+                            qr.save("otp_qr.png")
+                            print("QR code saved as otp_qr.png")
+                            print(f"Time untill a new otp is generated: {remaining} seconds\n")
+
+                        else:
+                            otp = hotp(base32_encoded_key, counter)
+                            print(f"\nOne time password succesfully generated: {otp}")
+                            print(f"Time untill a new otp is generated: {remaining} seconds\n")
+
 
                     except Exception as e:
                         print(f"Unable to  decrypt file: {e}\n")
@@ -140,15 +154,24 @@ if __name__ == "__main__":
         )
     parser.add_argument("-g", help="hexadecimal key")
     parser.add_argument("-k", help="encrypted hexadecimal file")
+    parser.add_argument("-q", action="store_true", help="create a qr code for this otp")
+    parser.add_argument("-v", help="To verify the code from the autheniticator")
     args = parser.parse_args()
+
+    if args.q:
+        generate_qr = True
+    if args.v:
+        user_code = args.v
 
     try:
         if args.g and args.k:
             print("Encript key or generate password please! One or the other!\n")
+        elif args.g and args.q:
+            print("No qr code for you yet! provide a hex key first!")
         elif args.g:
             store_and_encript_key_file(args.g)
         elif args.k:
-            generate_one_time_password(args.k)
+            generate_or_validate_one_time_password(args.k, generate_qr, user_code)
     except Exception as e:
         print(f"Could not initialize ft_otp: {e}\n")
 
@@ -156,8 +179,8 @@ if __name__ == "__main__":
 # mac/linux: use python3
 # windows: use python
 
-# Generate a random key: python3 generate_random_key.py  - or create a new file with your own hex key
-# Run: python3 ft_otp.py -g=random_key.txt  - (or your file) to save and encrypt key 
+# Generate a random key: python3 generate_key.py  - or create a new file with your own hex key
+# Run: python3 ft_otp.py -g=key.txt  - (or your file) to save and encrypt key 
 # Run: python3 ft_otp.py -k=ft_otp.key  - to create a one time password  
 # Run: python3 cleanup.py  - to start over
 
