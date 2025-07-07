@@ -58,10 +58,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
             description="Script that scrapes images from a given website"
         )
-    parser.add_argument("-r", required=False, type=bool)
+    parser.add_argument("url", help="Enter url")
+    parser.add_argument("-r", action="store_true", help="Recursive scraping")
     parser.add_argument("-l", required=False, type=int, help="Enter maximum recursive depth")
     parser.add_argument("-p", required=False, type=str, help="Enter download path")
-    parser.add_argument("url", type=str, help="Enter url")
     args = parser.parse_args()
 
     if args.r:
@@ -70,9 +70,9 @@ if __name__ == "__main__":
         max_depth = args.l
     if args.p:
         target_folder = args.p
-    url = args.url[4:]
+    url = args.url
 
 # Start scraping 
-# Command example mac/linux: python3 spider.py -r=true -l=1 -p=images url=https://www.codam.nl
-# Command example windows: python spider.py -r=true -l=1 -p=images url=https://www.codam.nl
+# Command example mac/linux: python3 spider.py https://www.codam.nl -r -l 4 p images
+# Command example windows: python spider.py https://www.codam.nl -r -l 4 p images
 scrape_images(url, 0, target_folder)
