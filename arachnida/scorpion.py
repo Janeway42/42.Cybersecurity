@@ -8,7 +8,7 @@ allowed_extensions = ('.jpg', '.jpeg', '.png', '.gif', '.bmp')
 
 class FriendlyArgParser(argparse.ArgumentParser):
     def error(self, message):
-        print(f"\n😕 Oops! Forgot something?\n")
+        print(f"\nOops! Forgot something?\n")
         exit(2)
 
 def parse_image_metadata(image_name):
@@ -55,17 +55,12 @@ if __name__ == "__main__":
     parser = FriendlyArgParser(
             description="Script that prints image metadata"
         )
-    parser.add_argument("first_file")
-    parser.add_argument("additional_files", nargs="*")
+
+    parser.add_argument("items", nargs="+", help="images to read metadata from")
     args = parser.parse_args()
 
-    images = [args.first_file] + args.additional_files
-    
-    if not images:
-        print("No files received. No files analyzed.\n")
-    else:
-        for image in images:
-            parse_image_metadata(image)
+    for image in args.items:
+        parse_image_metadata(image)
 
 
 # if PIllow not available run "pip3 install Pillow" before running the program 
