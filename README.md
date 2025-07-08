@@ -24,6 +24,10 @@ Scorpion: A small program that receives image files as parameters and parses the
 The program must at least be compatible with the same extensions that spider handles.
 It display basic attributes such as the creation date, as well as EXIF data. 
 
+Optional:
+- add an option that can modify/delete the metadata of a given file
+- a graphical interface for viewing and managing metadata
+
 ft_otp:
 -----------
 A program that stores an initial password in file and can generate a new one time password
