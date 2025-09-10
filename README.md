@@ -42,3 +42,9 @@ The generated one-time password must be random and must always contain the same 
 Optional: 
 - create a QR code with seed integration
 - create a graphic interface
+
+ft_onion: IN PROGRESS
+-----------
+
+access running container: docker exec -it onion bash
+retrieve tor address: cat /var/lib/tor/hidden_service
